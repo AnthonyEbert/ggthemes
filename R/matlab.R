@@ -1,8 +1,8 @@
 
 #' @export
-theme_matlab <- function(base_size = 12, base_family = ''){
+theme_matlab <- function(base_size = 12, base_family = '', aspect.ratio = 1){
 
-  theme_base(base_size, base_family) +
+  out <- theme_base(base_size, base_family) +
     theme(
       axis.ticks.length = unit( -base_size * 0.25, "points"),
       axis.text.x = element_text(margin = unit(rep(0.025, 4) * base_size, "cm")),
@@ -10,6 +10,10 @@ theme_matlab <- function(base_size = 12, base_family = ''){
       panel.border = element_rect(fill=NA, colour = "black", size= 0.01 * base_size),
       plot.margin = unit(rep(1/16, 4) * base_size, "cm")
     )
+
+  if(!is.na(aspect.ratio)){
+    out + theme(aspect.ratio = 1)
+  }
 }
 
 #' Make plot look like a Matlab plot
@@ -32,21 +36,24 @@ theme_matlab <- function(base_size = 12, base_family = ''){
 #' ) + stat_smooth(se = FALSE)
 #'
 #' @export
-post_matlab <- function(obj, xlim = c(NA, NA), ylim = c(NA, NA), base_size = 12, base_family = ''){
+post_matlab <- function(obj, xlim = c(NA, NA), ylim = c(NA, NA), base_size = 12, base_family = '', aspect.ratio = 1){
+
+  if(!is.na(ylim[2])){
+    y_mult_max = 0
+  } else {
+    y_mult_max = 0.05
+  }
 
   output <- obj +
     scale_x_continuous(
-      sec.axis = dup_axis(labels = NULL, name = NULL),
-      expand = c(0, 0),
+      expand = expand_scale(add = c(0, 0), mult = c(0, 0)),
       limits = xlim
     ) +
     scale_y_continuous(
-      sec.axis = dup_axis(labels = NULL, name = NULL),
-      expand = c(0, 0),
+      expand = expand_scale(add = c(0, 0), mult = c(0, y_mult_max)),
       limits = ylim
     ) +
-    theme_matlab(base_size, base_family) +
-    coord_fixed()
+    theme_matlab(base_size, base_family, aspect.ratio = aspect.ratio)
 
   return(output)
 
